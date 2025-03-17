@@ -1,0 +1,72 @@
+import random
+
+class Robot:
+    def __init__(self, name, hp, attack, accuracy, regen_rate, critical_chance, critical_multiplier):
+        self.name = name
+        self.hp = hp
+        self.attack = attack
+        self.accuracy = accuracy  # Nilai 0 sampai 1, lebih tinggi lebih sering mengenai
+        self.regen_rate = regen_rate  # Kecepatan regenerasi HP setiap ronde
+        self.critical_chance = critical_chance  # Kemungkinan untuk mendapatkan critical hit (0 hingga 1)
+        self.critical_multiplier = critical_multiplier  # Berapa kali damage jika terkena critical hit
+    
+    def attack_enemy(self, enemy):
+        # Menentukan apakah serangan mengenai atau meleset
+        if random.random() <= self.accuracy:
+            # Mengecek apakah serangan merupakan critical hit
+            if random.random() <= self.critical_chance:
+                damage = self.attack * self.critical_multiplier
+                print(f"{self.name} melakukan Critical Hit terhadap {enemy.name} dan memberikan {damage} damage!")
+            else:
+                damage = self.attack
+                print(f"{self.name} menyerang {enemy.name} dan memberikan {damage} damage!")
+            
+            enemy.hp -= damage
+        else:
+            print(f"{self.name} gagal menyerang {enemy.name}.")
+
+    def regen_health(self):
+        self.hp += self.regen_rate
+        print(f"{self.name} memulihkan {self.regen_rate} HP. HP sekarang: {self.hp}")
+
+    def is_alive(self):
+        return self.hp > 0
+
+
+class Game:
+    def __init__(self, robot1, robot2):
+        self.robot1 = robot1
+        self.robot2 = robot2
+        self.rounds = 0
+
+    def start(self):
+        print("Pertarungan dimulai!")
+        while self.robot1.is_alive() and self.robot2.is_alive():
+            self.rounds += 1
+            print(f"\nRonde {self.rounds}:")
+
+            # Setiap ronde, kedua robot menyerang dan kemudian pulihkan HP
+            self.robot1.attack_enemy(self.robot2)
+            if not self.robot2.is_alive():
+                print(f"{self.robot2.name} telah kalah! {self.robot1.name} menang!")
+                break
+
+            self.robot2.attack_enemy(self.robot1)
+            if not self.robot1.is_alive():
+                print(f"{self.robot1.name} telah kalah! {self.robot2.name} menang!")
+                break
+
+            # Regenerasi HP untuk kedua robot
+            self.robot1.regen_health()
+            self.robot2.regen_health()
+
+        print("\nPertarungan berakhir!")
+
+
+# Membuat dua robot dengan Critical Chance
+robot1 = Robot(name="Robot Alpha", hp=100, attack=20, accuracy=0.8, regen_rate=5, critical_chance=0.2, critical_multiplier=2)
+robot2 = Robot(name="Robot Beta", hp=100, attack=15, accuracy=0.9, regen_rate=3, critical_chance=0.1, critical_multiplier=2.5)
+
+# Memulai permainan
+game = Game(robot1, robot2)
+game.start()
